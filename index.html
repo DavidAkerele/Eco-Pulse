@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoPulse: The Carbon-Aware AI Sandbox</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="EcoPulse: A sleek developer and consumer sandbox revealing the real-time environmental cost of interacting with large language models (LLMs) using UK National Grid live coefficients.">
+  <meta name="keywords" content="AI carbon footprint, sustainable computing, green software, carbon intensity API, LLM energy calculator">
+  
+  <!-- Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="dns-prefetch" href="//d8j0ntlcm91z4.cloudfront.net">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+</head>
+<body>
+  
+  <!-- Video Background -->
+  <div class="video-bg-container">
+    <video autoplay loop muted playsinline preload="metadata" class="video-bg">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4" type="video/mp4">
+    </video>
+  </div>
+  
+  <!-- Background Glow Container to prevent overflow -->
+  <div class="bg-glow-container">
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+  </div>
+  
+  <!-- Full Application Layout (matches the layout architecture of the golf app visual reference) -->
+  <div class="app-layout">
+    
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar-nav">
+      <div class="sidebar-top">
+        <div class="sidebar-logo">
+          <i data-lucide="leaf" class="logo-icon text-green logo-icon-spin"></i>
+        </div>
+      </div>
+      <div class="sidebar-menu">
+        <button class="nav-item active" title="Playground Sandbox"><i data-lucide="terminal"></i></button>
+        <button class="nav-item" title="Model Registry"><i data-lucide="cpu"></i></button>
+        <button class="nav-item" title="Live Power Grid"><i data-lucide="activity"></i></button>
+        <button class="nav-item" title="Generation Mix"><i data-lucide="pie-chart"></i></button>
+        <button class="nav-item" title="Carbon Forecast"><i data-lucide="trending-up"></i></button>
+        <button class="nav-item" id="nav-budget-btn" title="Carbon Budget Tracker"><i data-lucide="gauge"></i></button>
+      </div>
+      <div class="sidebar-bottom">
+        <button class="nav-item" title="Diagnostics Settings"><i data-lucide="settings"></i></button>
+        <button class="nav-item" id="info-btn" title="About EcoPulse"><i data-lucide="info"></i></button>
+      </div>
+    </aside>
+    
+    <!-- Central Main Viewport -->
+    <main class="main-viewport">
+      
+      <!-- Top Control Pill Bar (matches pill bar in image) -->
+      <div class="top-pill-bar">
+        <span class="pill-title">EcoPulse Sandbox</span>
+        <span class="pill-divider"></span>
+        <div class="pill-model-selector">
+          <label for="model-select">Model</label>
+          <select id="model-select" class="pill-select">
+            <option value="eco-router" selected>Eco-Router (Auto-Select)</option>
+            <option value="gpt-4-opus">Claude 3 Opus (XL)</option>
+            <option value="gpt-4o-sonnet">Claude 3.5 Sonnet (L)</option>
+            <option value="gpt-35-llama70">Llama 3 70B (M)</option>
+            <option value="llama3-8b-flash">Llama 3 8B / Flash (S)</option>
+          </select>
+        </div>
+        <span class="pill-divider" id="router-divider" style="display: none;"></span>
+        <div id="router-indicator" class="router-badge" style="display: none;">
+          <span class="pulse-ring" style="background-color: var(--green); animation: pulse-green 2s infinite;"></span>
+          <span id="router-status-text">ROUTED: FLASH (S)</span>
+        </div>
+        <span class="pill-divider"></span>
+        <!-- Live status telemetry -->
+        <div id="live-indicator" class="live-badge live-simulated">
+          <span class="pulse-ring"></span>
+          <span id="live-status-text">CONNECTING</span>
+        </div>
+        <button id="refresh-grid-btn" class="pill-icon-btn" title="Refresh Live Grid Telemetry">
+          <i data-lucide="refresh-cw"></i>
+        </button>
+        <span class="pill-divider"></span>
+        <div id="savings-badge" class="savings-badge">
+          <span class="savings-badge-glow"></span>
+          <i data-lucide="leaf" class="text-green logo-icon-spin"></i>
+          <span>Saved: <strong id="session-savings-val">0.000g</strong></span>
+        </div>
+        <span class="pill-divider"></span>
+        <div id="EcoPulse-score-badge" class="savings-badge score-badge">
+          <span class="savings-badge-glow score-glow"></span>
+          <i data-lucide="award" class="text-lime"></i>
+          <span>Score: <strong id="header-score-val">0</strong> pts</span>
+          <span id="header-streak-separator" class="header-streak-sep" style="display:none; margin: 0 4px; opacity: 0.3;">|</span>
+          <span id="header-streak-badge" style="display:none; color: var(--amber);">🔥 <strong id="header-streak-val">0</strong></span>
+        </div>
+      </div>
+      
+      <!-- Bottom Bento Grid (Redesigned 2-column layout for visual clarity and info enrichment) -->
+      <div class="bottom-bento-grid">
+        
+        <!-- Bento Column 1: Main Prompt Workspace & Terminal -->
+        <div class="bento-column bento-col-main">
+          <!-- Bento Item 1: Prompt Workspace -->
+          <div class="card glass-card card-prompt">
+            <div class="card-header">
+              <i data-lucide="terminal" class="header-icon text-green"></i>
+              <h2>Prompt Workspace</h2>
+            </div>
+            <div class="card-body">
+              <textarea id="prompt-input" class="form-control text-area" placeholder="Type a prompt to run. E.g., 'Write a python script to sort arrays', 'Draft a 500-word essay', etc."></textarea>
+              <div class="workspace-counters">
+                <div class="counter-item">
+                  <span class="counter-num" id="char-count">0</span>
+                  <span class="counter-lbl">Chars</span>
+                </div>
+                <div class="counter-item">
+                  <span class="counter-num" id="token-estimate">0</span>
+                  <span class="counter-lbl">Tokens</span>
+                </div>
+                <div class="counter-item">
+                  <span class="counter-num" id="energy-estimate">0.0 Wh</span>
+                  <span class="counter-lbl">Est Wh</span>
+                </div>
+              </div>
+              <button id="audit-btn" class="btn btn-primary btn-glow">
+                <i data-lucide="zap"></i> Run Carbon Audit
+              </button>
+            </div>
+          </div>
+          
+          <!-- Bento Item 2: Inference Terminal -->
+          <div class="card glass-card card-terminal" id="terminal-container">
+            <div class="terminal-bar">
+              <div class="terminal-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+              </div>
+              <span class="terminal-title">Inference Audit Terminal</span>
+            </div>
+            <div class="terminal-body" id="terminal-body">
+              <div class="term-line text-muted">> Waiting for prompt input...</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bento Column 2: Grid Dial & Green Education Stack -->
+        <div class="bento-column bento-col-side">
+          <!-- Bento Item 3: Live Grid Intensity Circle -->
+          <div class="card glass-card dial-card">
+            <div class="card-header">
+              <i data-lucide="activity" class="header-icon text-amber"></i>
+              <h2>UK Grid Coefficient</h2>
+            </div>
+            <div class="card-body dial-body">
+              <div class="gauge-container">
+                <svg class="gauge" viewBox="0 0 100 100">
+                  <circle class="gauge-bg" cx="50" cy="50" r="45"></circle>
+                  <circle id="gauge-fill" class="gauge-value" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="140"></circle>
+                </svg>
+                <div class="gauge-content">
+                  <span class="gauge-value-text" id="intensity-value">--</span>
+                  <span class="gauge-unit">gCO₂/kWh</span>
+                </div>
+              </div>
+              <div class="dial-status-info">
+                <div class="intensity-label-text" id="intensity-label">Loading...</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Bento Item 4: Green AI Guide -->
+          <div class="card glass-card guide-card">
+            <div class="card-header">
+              <i data-lucide="book-open" class="header-icon text-green"></i>
+              <h2>Green AI Guide</h2>
+            </div>
+            <div class="card-body guide-body">
+              <div id="grid-advice-box" class="grid-advice-box advice-moderate">
+                <div class="advice-header">
+                  <i data-lucide="info" class="advice-icon text-amber"></i>
+                  <strong>Evaluating Grid Status...</strong>
+                </div>
+              </div>
+              <div class="tips-container">
+                <div class="tip-item">
+                  <span class="tip-title"><i data-lucide="cpu" class="text-green"></i> Distillation Savings</span>
+                  <p class="tip-desc">Run smaller distilled models (e.g. Llama 8B) for up to 90% footprint reductions unless premium reasoning is needed.</p>
+                </div>
+                <div class="tip-item">
+                  <span class="tip-title"><i data-lucide="database" class="text-cyan"></i> Prompt Caching</span>
+                  <p class="tip-desc">Cache repetitive prompts locally to bypass redundant GPU inferences, saving cooling water and e-waste depletion.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      
+    </main>
+    
+    <!-- Right Sidebar Panel (matches statistical panels on the right side of the image) -->
+    <aside class="right-sidebar">
+      <div class="sidebar-tabs">
+        <button class="tab-btn active" id="tab-telemetry">Telemetry</button>
+        <button class="tab-btn" id="tab-recommendations">Actions</button>
+        <button class="tab-btn" id="tab-quiz">Local Impact</button>
+        <button class="tab-btn" id="tab-budget">Budget</button>
+      </div>
+      
+      <div class="right-sidebar-content">
+        
+        <!-- Audit Results Section -->
+        <div class="card glass-card results-card visible" id="metrics-results">
+          <div class="card-header">
+            <i data-lucide="bar-chart-3" class="header-icon text-emerald"></i>
+            <h2>Audit Footprint</h2>
+          </div>
+          <div class="card-body">
+            <div class="metrics-grid">
+              <div class="metric-block">
+                <span class="metric-icon-wrap bg-blue-dim"><i data-lucide="zap" class="text-blue"></i></span>
+                <div class="metric-data">
+                  <span class="metric-val" id="res-energy">0.0 Wh</span>
+                  <span class="metric-lbl">Total Energy</span>
+                </div>
+              </div>
+              <div class="metric-block">
+                <span class="metric-icon-wrap bg-green-dim"><i data-lucide="leaf" class="text-green"></i></span>
+                <div class="metric-data">
+                  <span class="metric-val" id="res-carbon">0.0 g</span>
+                  <span class="metric-lbl">Carbon (CO₂)</span>
+                </div>
+              </div>
+              <div class="metric-block">
+                <span class="metric-icon-wrap bg-cyan-dim"><i data-lucide="droplet" class="text-cyan"></i></span>
+                <div class="metric-data">
+                  <span class="metric-val" id="res-water">0.0 ml</span>
+                  <span class="metric-lbl">Water Cooling</span>
+                </div>
+              </div>
+              <div class="metric-block">
+                <span class="metric-icon-wrap bg-red-dim"><i data-lucide="trash-2" class="text-red"></i></span>
+                <div class="metric-data">
+                  <span class="metric-val" id="res-ewaste">0.000 mg</span>
+                  <span class="metric-lbl">Hardware Depletion</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="analogies-narrative-box">
+              <p id="analogy-narrative">Run an audit to calculate ecological comparisons and narratives.</p>
+            </div>
+            
+            <div class="analogies-grid">
+              <div class="analogy-item">
+                <i data-lucide="lightbulb" class="text-yellow"></i>
+                <div class="analogy-details">
+                  <span class="analogy-val" id="analogy-led">0 hrs</span>
+                  <span class="analogy-lbl">LED bulb hours</span>
+                </div>
+              </div>
+              <div class="analogy-item">
+                <i data-lucide="smartphone" class="text-cyan"></i>
+                <div class="analogy-details">
+                  <span class="analogy-val" id="analogy-phone">0 charges</span>
+                  <span class="analogy-lbl">Phone Charges</span>
+                </div>
+              </div>
+              <div class="analogy-item">
+                <i data-lucide="droplet" class="text-blue"></i>
+                <div class="analogy-details">
+                  <span class="analogy-val" id="analogy-water">0 sips</span>
+                  <span class="analogy-lbl">Water sips</span>
+                </div>
+              </div>
+              <div class="analogy-item">
+                <i data-lucide="tree-pine" class="text-green"></i>
+                <div class="analogy-details">
+                  <span class="analogy-val" id="analogy-tree">0 s</span>
+                  <span class="analogy-lbl">Tree Absorption</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Live Fuel Mix Section -->
+        <div class="card glass-card fuel-card">
+          <div class="card-header">
+            <i data-lucide="pie-chart" class="header-icon text-cyan"></i>
+            <h2>Fuel Energy Mix</h2>
+          </div>
+          <div class="card-body">
+            <div class="fuel-list" id="fuel-list">
+              <div class="loading-state">
+                <span class="spinner"></span> Loading grid mix...
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Carbon Forecast Chart Section -->
+        <div class="card glass-card forecast-card">
+          <div class="card-header">
+            <i data-lucide="trending-up" class="header-icon text-indigo"></i>
+            <h2>12-Hour Carbon Forecast</h2>
+          </div>
+          <div class="card-body">
+            <div class="forecast-chart" id="forecast-chart-container">
+              <!-- Dynamically populated vertical bars -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Session Audit History Section -->
+        <div class="card glass-card history-card" id="history-card">
+          <div class="card-header">
+            <i data-lucide="history" class="header-icon text-green"></i>
+            <h2>Audit History</h2>
+          </div>
+          <div class="card-body">
+            <div class="history-list" id="history-list">
+              <div class="no-history-state text-muted">
+                No queries audited this session.
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Recommendations Section -->
+        <div class="card glass-card recommendations-card" id="recommendations-panel" style="display:none;">
+          <div class="card-header">
+            <i data-lucide="shield-check" class="header-icon text-green"></i>
+            <h2>EcoPulse Actions & Models</h2>
+          </div>
+          <div class="card-body">
+            
+            <!-- EcoPulse Challenges -->
+            <div class="challenges-section">
+              <div class="challenges-header">
+                <i data-lucide="trophy" class="text-amber header-icon"></i>
+                <h3>EcoPulse Challenges</h3>
+              </div>
+              <div class="challenges-list">
+                <!-- Flash Diet -->
+                <div class="challenge-item" id="challenge-flash-diet">
+                  <div class="challenge-info">
+                    <span class="challenge-title">Flash Diet</span>
+                    <span class="challenge-status" id="challenge-flash-diet-status">0/3</span>
+                  </div>
+                  <div class="challenge-bar">
+                    <div class="challenge-fill fill-green" id="challenge-flash-diet-fill"></div>
+                  </div>
+                  <span class="challenge-desc">Route 3 queries to Llama 8B / Flash model.</span>
+                </div>
+                
+                <!-- Peak Shifter -->
+                <div class="challenge-item" id="challenge-peak-shifter">
+                  <div class="challenge-info">
+                    <span class="challenge-title">Peak Shifter</span>
+                    <span class="challenge-status" id="challenge-peak-shifter-status">0/1</span>
+                  </div>
+                  <div class="challenge-bar">
+                    <div class="challenge-fill fill-blue" id="challenge-peak-shifter-fill"></div>
+                  </div>
+                  <span class="challenge-desc">Schedule a query for a low-intensity slot.</span>
+                </div>
+                
+                <!-- Eco Adoption -->
+                <div class="challenge-item" id="challenge-eco-router">
+                  <div class="challenge-info">
+                    <span class="challenge-title">Eco Adoption</span>
+                    <span class="challenge-status" id="challenge-eco-router-status">0/1</span>
+                  </div>
+                  <div class="challenge-bar">
+                    <div class="challenge-fill fill-lime" id="challenge-eco-router-fill"></div>
+                  </div>
+                  <span class="challenge-desc">Run an audit using the Green Eco-Router.</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Active Model Specs Details -->
+            <div class="model-spec-box" style="margin-bottom: 20px;">
+              <div class="spec-row">
+                <span class="spec-label" id="spec-model-name">GPT-4o / Sonnet</span>
+                <span class="badge" id="model-badge">Large</span>
+              </div>
+              <div class="spec-stats">
+                <div class="stat-item">
+                  <span class="stat-val" id="spec-energy">4.0 Wh / 1k</span>
+                  <span class="stat-lbl">Energy draw (Est)</span>
+                </div>
+              </div>
+              <p class="spec-slogan" id="spec-slogan">Frontier reasoning, balanced carbon profile.</p>
+            </div>
+            
+            <!-- Loaded dynamically in recommendations-list -->
+            <div class="recommendations-list" id="recommendations-list">
+              <!-- Loaded dynamically -->
+            </div>
+            
+            <!-- Comparison Matrix inside Actions tab -->
+            <div class="compare-toggle-container">
+              <button class="compare-toggle-btn" id="compare-toggle-btn">
+                <i data-lucide="bar-chart-2"></i> Compare Model Footprints <i data-lucide="chevron-right" class="toggle-arrow"></i>
+              </button>
+              <div class="compare-matrix-drawer" id="compare-matrix-drawer">
+                <table class="compare-table">
+                  <thead>
+                    <tr>
+                      <th>Model Class</th>
+                      <th>Energy / 1k</th>
+                      <th>Footprint</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="table-opus">
+                      <td>Claude 3 Opus (XL)</td>
+                      <td class="font-mono text-red">12.0 Wh</td>
+                      <td><span class="rating rating-critical">Critical</span></td>
+                    </tr>
+                    <tr class="table-sonnet">
+                      <td>GPT-4o / Sonnet (L)</td>
+                      <td class="font-mono text-orange">4.0 Wh</td>
+                      <td><span class="rating rating-high">High</span></td>
+                    </tr>
+                    <tr class="table-standard">
+                      <td>Llama-3 70B (M)</td>
+                      <td class="font-mono text-yellow">1.5 Wh</td>
+                      <td><span class="rating rating-medium">Medium</span></td>
+                    </tr>
+                    <tr class="table-flash">
+                      <td>Gemini Flash / Llama-8B (S)</td>
+                      <td class="font-mono text-green">0.3 Wh</td>
+                      <td><span class="rating rating-clean">Optimal</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <!-- Local Carbon Impact Section -->
+        <div class="card glass-card local-panel" id="quiz-panel" style="display:none;">
+          <div class="card-header">
+            <i data-lucide="map-pin" class="header-icon text-cyan"></i>
+            <h2>Local Carbon Impact</h2>
+          </div>
+          <div class="card-body local-panel-body">
+
+            <!-- City / Region Selector -->
+            <div class="local-region-selector">
+              <label for="local-city-select" class="local-select-label">
+                <i data-lucide="map" style="width:14px;height:14px;"></i>
+                Your Region
+              </label>
+              <div class="local-select-wrapper">
+                <select id="local-city-select" class="form-control local-select">
+                  <option value="13">London</option>
+                  <option value="3" selected>Manchester (North West)</option>
+                  <option value="4">Newcastle (North East)</option>
+                  <option value="5">Leeds / Sheffield (Yorkshire)</option>
+                  <option value="6">Liverpool (Merseyside)</option>
+                  <option value="8">Birmingham (West Midlands)</option>
+                  <option value="9">Nottingham (East Midlands)</option>
+                  <option value="10">Norwich (East England)</option>
+                  <option value="11">Bristol / Exeter (South West)</option>
+                  <option value="12">Southampton (South England)</option>
+                  <option value="14">Brighton (South East)</option>
+                  <option value="7">Cardiff (South Wales)</option>
+                  <option value="2">Edinburgh / Glasgow (S. Scotland)</option>
+                  <option value="1">Aberdeen (N. Scotland)</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-chevron"></i>
+              </div>
+              <button id="local-fetch-btn" class="btn btn-primary" style="font-size:0.75rem; padding:7px 14px; margin-top:8px; width:100%;">
+                <i data-lucide="refresh-cw"></i> Fetch Live Regional Data
+              </button>
+            </div>
+
+            <!-- Regional Intensity Card (live) -->
+            <div class="local-region-card" id="local-region-card">
+              <div class="local-region-header">
+                <div class="local-region-name-row">
+                  <span class="local-pulse" id="local-pulse"></span>
+                  <span class="local-region-name" id="local-region-name">Select a region...</span>
+                </div>
+                <span class="local-region-badge" id="local-region-badge">—</span>
+              </div>
+              <div class="local-intensity-row">
+                <div class="local-intensity-block">
+                  <span class="local-intensity-val" id="local-intensity-val">—</span>
+                  <span class="local-intensity-unit">gCO₂/kWh</span>
+                </div>
+                <div class="local-intensity-label" id="local-intensity-label">Loading regional data...</div>
+              </div>
+            </div>
+
+            <!-- Contribution Comparison -->
+            <div class="local-section-divider"><span>Your AI Footprint vs Your Area</span></div>
+
+            <!-- Two comparison bars -->
+            <div class="local-compare-grid">
+              <div class="local-compare-item">
+                <div class="local-compare-header">
+                  <i data-lucide="cpu" style="width:13px;height:13px;" class="text-green"></i>
+                  <span>Your AI Audits Today</span>
+                </div>
+                <div class="local-compare-val" id="local-your-co2">0.000g</div>
+                <div class="local-compare-bar-track">
+                  <div class="local-compare-bar-fill" id="local-your-bar" style="width:0%; background: var(--green);"></div>
+                </div>
+              </div>
+              <div class="local-compare-item">
+                <div class="local-compare-header">
+                  <i data-lucide="user" style="width:13px;height:13px;" class="text-blue"></i>
+                  <span>Avg. Daily Digital Footprint</span>
+                </div>
+                <div class="local-compare-val text-blue" id="local-avg-co2">~200g</div>
+                <div class="local-compare-bar-track">
+                  <div class="local-compare-bar-fill" style="width:100%; background: var(--blue); opacity:0.35;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Percentage Contribution Statement -->
+            <div class="local-pct-box" id="local-pct-box">
+              <div class="local-pct-row">
+                <span class="local-pct-label">Your AI share of avg. daily digital footprint</span>
+                <span class="local-pct-val" id="local-pct-val">0.00%</span>
+              </div>
+              <div class="local-pct-bar-track">
+                <div class="local-pct-bar-fill" id="local-pct-bar" style="width:0%;"></div>
+              </div>
+            </div>
+
+            <!-- Per-Capita Electricity Context -->
+            <div class="local-context-box" id="local-context-box">
+              <div class="local-context-row">
+                <i data-lucide="zap" class="text-amber" style="width:14px;height:14px;flex-shrink:0;"></i>
+                <span id="local-context-text">Select a region and fetch data to see how your AI usage compares to the average daily per-capita electricity carbon footprint in your area.</span>
+              </div>
+            </div>
+
+            <!-- Regional Fuel Mini-Mix -->
+            <div class="local-section-divider"><span>Regional Energy Mix</span></div>
+            <div class="local-fuel-mini" id="local-fuel-mini">
+              <div class="loading-state" style="font-size:0.75rem; padding: 12px 0;">
+                <span class="spinner"></span> Awaiting regional data...
+              </div>
+            </div>
+
+            <!-- Region Insight -->
+            <div class="local-insight-box" id="local-insight-box" style="display:none;">
+              <div class="local-insight-header">
+                <i data-lucide="lightbulb" class="text-amber" style="width:14px;height:14px;"></i>
+                <strong>Region Insight</strong>
+              </div>
+              <p class="local-insight-text" id="local-insight-text"></p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ===== Carbon Budget Panel ===== -->
+        <div class="card glass-card budget-panel" id="budget-panel" style="display:none;">
+          <div class="card-header">
+            <i data-lucide="gauge" class="header-icon text-lime"></i>
+            <h2>Carbon Budget</h2>
+          </div>
+          <div class="card-body">
+
+            <!-- Budget Ring Gauge -->
+            <div class="budget-ring-wrapper">
+              <svg class="budget-ring-svg" viewBox="0 0 140 140">
+                <!-- Track circle -->
+                <circle class="budget-ring-track" cx="70" cy="70" r="58"></circle>
+                <!-- Fill circle (progress) -->
+                <circle class="budget-ring-fill" id="budget-ring-fill" cx="70" cy="70" r="58"
+                  stroke-dasharray="364.4" stroke-dashoffset="364.4"></circle>
+                <!-- Warning arc (threshold marker at 80%) -->
+                <circle class="budget-ring-warn" id="budget-ring-warn" cx="70" cy="70" r="58"
+                  stroke-dasharray="364.4" stroke-dashoffset="364.4" style="display:none;"></circle>
+              </svg>
+              <div class="budget-ring-center">
+                <span class="budget-used-val" id="budget-used-val">0.000</span>
+                <span class="budget-used-unit">g CO₂</span>
+                <span class="budget-used-label" id="budget-used-label">of budget used</span>
+              </div>
+            </div>
+
+            <!-- Budget Progress Bar (linear supplement) -->
+            <div class="budget-bar-track">
+              <div class="budget-bar-fill" id="budget-bar-fill" style="width: 0%;"></div>
+              <div class="budget-warn-marker" id="budget-warn-marker"></div>
+            </div>
+            <div class="budget-bar-labels">
+              <span class="budget-bar-lbl">0g</span>
+              <span class="budget-bar-lbl" id="budget-bar-limit-lbl">1.000g</span>
+            </div>
+
+            <!-- Budget Stats Row -->
+            <div class="budget-stats-row">
+              <div class="budget-stat-item">
+                <span class="budget-stat-val" id="budget-remaining-val">1.000g</span>
+                <span class="budget-stat-lbl">Remaining</span>
+              </div>
+              <div class="budget-stat-divider"></div>
+              <div class="budget-stat-item">
+                <span class="budget-stat-val" id="budget-pct-val">0%</span>
+                <span class="budget-stat-lbl">Used</span>
+              </div>
+              <div class="budget-stat-divider"></div>
+              <div class="budget-stat-item">
+                <span class="budget-stat-val" id="budget-audits-val">0</span>
+                <span class="budget-stat-lbl">Audits Today</span>
+              </div>
+            </div>
+
+            <!-- Status Alert Box -->
+            <div class="budget-alert-box budget-alert-safe" id="budget-alert-box">
+              <div class="budget-alert-header">
+                <i data-lucide="shield-check" class="budget-alert-icon text-green" id="budget-alert-icon"></i>
+                <strong id="budget-alert-title">Budget Safe</strong>
+              </div>
+              <p class="budget-alert-desc" id="budget-alert-desc">You're well within your daily CO₂ limit. Keep using eco-friendly models!</p>
+            </div>
+
+            <!-- Divider -->
+            <div class="budget-section-divider">
+              <span>Daily Settings</span>
+            </div>
+
+            <!-- Budget Limit Setter -->
+            <div class="budget-limit-row">
+              <label for="budget-limit-input" class="budget-limit-label">
+                <i data-lucide="sliders" style="width:14px;height:14px;"></i>
+                Daily CO₂ Budget Limit
+              </label>
+              <div class="budget-limit-controls">
+                <button class="budget-preset-btn" data-limit="0.5" title="Ultra Green (0.5g)">0.5g</button>
+                <button class="budget-preset-btn" data-limit="1" title="Standard (1g)">1g</button>
+                <button class="budget-preset-btn" data-limit="2" title="Relaxed (2g)">2g</button>
+                <button class="budget-preset-btn" data-limit="5" title="Developer (5g)">5g</button>
+              </div>
+              <div class="budget-custom-row">
+                <input type="number" id="budget-limit-input" class="budget-limit-input" 
+                  placeholder="Custom (g)" min="0.1" max="50" step="0.1" value="1">
+                <button id="budget-set-btn" class="btn btn-primary" style="font-size:0.75rem; padding: 6px 14px;">
+                  <i data-lucide="check"></i> Set
+                </button>
+              </div>
+            </div>
+
+            <!-- Reset Button -->
+            <button id="budget-reset-btn" class="btn btn-secondary w-full" style="margin-top: 8px;">
+              <i data-lucide="rotate-ccw"></i> Reset Today's Budget
+            </button>
+
+            <!-- Streak / History -->
+            <div class="budget-section-divider">
+              <span>Budget History</span>
+            </div>
+
+            <!-- Under Budget Streak -->
+            <div class="budget-streak-box">
+              <div class="budget-streak-item">
+                <i data-lucide="flame" class="text-amber"></i>
+                <div class="budget-streak-text">
+                  <span class="budget-streak-num" id="budget-streak-days">0</span>
+                  <span class="budget-streak-lbl">Day Streak Under Budget</span>
+                </div>
+              </div>
+              <div class="budget-streak-item">
+                <i data-lucide="leaf" class="text-green"></i>
+                <div class="budget-streak-text">
+                  <span class="budget-streak-num" id="budget-total-saved">0.000g</span>
+                  <span class="budget-streak-lbl">Total CO₂ Used (All Time)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Daily Log List -->
+            <div class="budget-log-list" id="budget-log-list">
+              <div class="no-history-state text-muted">No audits logged today.</div>
+            </div>
+
+          </div>
+        </div>
+        <!-- ===== End Carbon Budget Panel ===== -->
+        
+      </div>
+    </aside>
+    
+  </div>
+
+  <!-- Settings Modal (triggered via sidebar nav Settings click) -->
+  <div id="settings-modal" class="modal-overlay">
+    <div class="modal-content glass-card">
+      <div class="modal-header">
+        <div class="modal-title-area">
+          <i data-lucide="settings" class="text-green"></i>
+          <h2>Diagnostics & Settings</h2>
+        </div>
+        <button class="modal-close-btn" id="close-settings-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-info-desc">Adjust variables running in this sandbox. These settings affect calculations and simulated coefficients.</p>
+        
+        <div class="input-group">
+          <label for="settings-intensity-offset">Grid Coefficient Multiplier</label>
+          <input type="number" id="settings-intensity-offset" class="form-control" value="1.0" min="0.5" max="2.0" step="0.1">
+          <span class="input-desc">Simulated or fetched intensity values are multiplied by this factor to model high-emission peak grids.</span>
+        </div>
+        
+        <div class="input-group">
+          <label for="settings-sim-toggle">Manual Simulation Mode</label>
+          <div class="select-wrapper">
+            <select id="settings-sim-toggle" class="form-control">
+              <option value="auto">Automatic (Live Fetch with Fallback)</option>
+              <option value="sim">Force Diurnal Simulator Mode</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-arrow"></i>
+          </div>
+          <span class="input-desc">Switch from actual UK API metrics to offline mock data simulations to trace carbon intensity cycles.</span>
+        </div>
+        
+        <button id="reset-savings-btn" class="btn btn-secondary">
+          <i data-lucide="trash-2"></i> Reset Carbon Savings Tally
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
